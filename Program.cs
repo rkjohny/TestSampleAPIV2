@@ -44,8 +44,8 @@ namespace TestSampleAPIV2
         public static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
         private static readonly Random Rnd = new();
 
-        private const int MaxDataSet = 5000;
-        private const int MaxNumberOfRequest = 10000;
+        private const int TotalNumberOfData = 5000;
+        private const int TotalNumberOfRequest = 10000;
 
         private static Person[]? _persons;
 
@@ -83,7 +83,7 @@ namespace TestSampleAPIV2
 
         private static void GenerateData()
         {
-            _persons = new Person[MaxDataSet];
+            _persons = new Person[TotalNumberOfData];
             for (var i = 0; i < _persons.Length; i++)
             {
                 _persons[i] = new Person
@@ -203,9 +203,9 @@ namespace TestSampleAPIV2
 
         private static async Task ExecuteTestAsync(Request request)
         {
-            var tasks = new Task[MaxNumberOfRequest];
+            var tasks = new Task[TotalNumberOfRequest];
 
-            for (var i = 0; i < MaxNumberOfRequest; i++)
+            for (var i = 0; i < TotalNumberOfRequest; i++)
             {
                 tasks[i] = Task.Run(() => SendRequest(request));
             }
@@ -256,7 +256,7 @@ namespace TestSampleAPIV2
                 }
             }
 
-            if (_totalResponse >= MaxNumberOfRequest)
+            if (_totalResponse >= TotalNumberOfRequest)
             {
                 Semaphore.Release();
             }
@@ -275,7 +275,7 @@ namespace TestSampleAPIV2
             Client.Timeout = TimeSpan.FromSeconds(30000); // 30 seconds
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
-            Console.WriteLine("Generating test data set of size: " + MaxDataSet);
+            Console.WriteLine("Generating test data set of size: " + TotalNumberOfData);
             Console.WriteLine("");
 
             GenerateData();
@@ -288,7 +288,7 @@ namespace TestSampleAPIV2
             Console.WriteLine("");
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
-            Console.WriteLine("Starting execution of " + MaxNumberOfRequest + " requests: " + dbType);
+            Console.WriteLine("Starting execution of " + TotalNumberOfRequest + " requests: " + dbType);
             Console.WriteLine("");
 
             Request request = GetRequest(dbType);
