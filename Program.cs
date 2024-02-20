@@ -63,6 +63,8 @@ namespace TestSampleAPIV2
         // Create HttpClient instance
         static readonly HttpClient Client = new();
 
+        static readonly SemaphoreSlim Semaphore = new SemaphoreSlim(0, 1);
+
         public static string ShuffleString(string stringToShuffle)
         {
             string shuffled;
@@ -200,9 +202,7 @@ namespace TestSampleAPIV2
             _totalFailed = 0;
             _totalResponse = 0;
 
-            request.StartTime = DateTime.Now;
             await ExecuteTestAsync(request, MaxNumberOfRequest);
-            request.EndTime = DateTime.Now;
         }
 
 
@@ -232,10 +232,14 @@ namespace TestSampleAPIV2
 
                 if (!RequestList.TryGetValue(email, out Person? person) || person.Email != email)
                 {
-                    Console.WriteLine("Received: " + message);
                     Console.WriteLine("Response did not match with input");
                     Interlocked.Increment(ref _totalFailed);
                 }
+            }
+
+            if (_totalResponse >= MaxNumberOfRequest)
+            {
+                Semaphore.Release();
             }
         }
 
@@ -257,7 +261,7 @@ namespace TestSampleAPIV2
 
             GenerateData();
 
-            const DbType dbType = DbType.Redis;
+            const DbType dbType = DbType.InMemory;
 
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
@@ -269,11 +273,14 @@ namespace TestSampleAPIV2
             Console.WriteLine("");
 
             Request request = GetRequest(dbType);
+            request.StartTime = DateTime.Now;
             await Execute(request);
 
             Console.WriteLine("All requests have been sent successfully.");
-           Console.WriteLine("Waiting to get all responses. Press Enter few seconds later");
-            Console.ReadLine();
+            Console.WriteLine("Waiting to get all responses.");
+            
+            await Semaphore.WaitAsync(TimeSpan.FromMinutes(2)); // wait maximum 2 minutes to get all responses
+            request.EndTime = DateTime.Now;
             
             Print(request);
         }
