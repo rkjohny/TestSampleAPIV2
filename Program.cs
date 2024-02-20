@@ -201,11 +201,11 @@ namespace TestSampleAPIV2
         }
 
 
-        private static async Task ExecuteTestAsync(Request request, int num)
+        private static async Task ExecuteTestAsync(Request request)
         {
-            var tasks = new Task[num];
+            var tasks = new Task[MaxNumberOfRequest];
 
-            for (var i = 0; i < num; i++)
+            for (var i = 0; i < MaxNumberOfRequest; i++)
             {
                 tasks[i] = Task.Run(() => SendRequest(request));
             }
@@ -219,7 +219,7 @@ namespace TestSampleAPIV2
             _totalFailed = 0;
             _totalResponse = 0;
 
-            await ExecuteTestAsync(request, MaxNumberOfRequest);
+            await ExecuteTestAsync(request);
         }
 
 
