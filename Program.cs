@@ -257,7 +257,7 @@ namespace TestSampleAPIV2
 
             GenerateData();
 
-            const DbType dbType = DbType.MySql;
+            const DbType dbType = DbType.PgSql;
 
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
@@ -272,7 +272,7 @@ namespace TestSampleAPIV2
             await Execute(request);
 
             Console.WriteLine("All requests have been sent successfully.");
-           Console.WriteLine("Waiting to get all responses. Press Enter few minutes later");
+           Console.WriteLine("Waiting to get all responses. Press Enter several seconds later");
             Console.ReadLine();
             
             Print(request);
