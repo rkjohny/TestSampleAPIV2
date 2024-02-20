@@ -195,29 +195,6 @@ namespace TestSampleAPIV2
             await Task.WhenAll(tasks);
         }
 
-#if false
-        private static async Task ExecuteTest(Request request)
-        {
-            var n = MaxNumberOfRequest;
-            const int requestChunkSize = 1000;
-
-            while (n > 0)
-            {
-                if (n >= requestChunkSize)
-                {
-                    await ExecuteTestAsync(request, requestChunkSize);
-                    n -= requestChunkSize;
-                }
-                else
-                {
-                    await ExecuteTestAsync(request, n);
-                    n = 0;
-                }
-                Console.Write(".");
-            }
-            Console.WriteLine("");
-        }
-#endif
         private static async Task Execute(Request request)
         {
             _totalFailed = 0;
