@@ -160,8 +160,25 @@ namespace TestSampleAPIV2
                         // Read and display the response body
                         try
                         {
-                            RequestList.TryAdd(person.Email!, person);
+                            //RequestList.TryAdd(person.Email!, person);
                             var responseContent = await response.Content.ReadAsStringAsync();
+                            var jsonResponse = JsonNode.Parse(responseContent)!;
+                            var resTrackingId = jsonResponse["trackingId"]!;
+                            var resEmail = jsonResponse["email"]!;
+                            
+                            var trackingId = resTrackingId.GetValue<string>();
+                            var email = resEmail.GetValue<string>();
+
+                            if (!RequestList.TryAdd(trackingId, person))
+                            {
+                                Console.WriteLine("Request already exists");
+                            }
+
+                            if (email != person.Email)
+                            {
+                                Console.WriteLine("Response did not match with input");
+                                Interlocked.Increment(ref _totalFailed);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -191,9 +208,9 @@ namespace TestSampleAPIV2
             for (var i = 0; i < num; i++)
             {
                 tasks[i] = Task.Run(() => SendRequest(request));
-                Console.Write(".");
             }
-            Console.WriteLine("");
+            Console.WriteLine("All requests have been sent successfully.");
+            Console.WriteLine("Waiting to get all responses.");
             await Task.WhenAll(tasks);
         }
 
@@ -226,13 +243,15 @@ namespace TestSampleAPIV2
                 Interlocked.Increment(ref _totalResponse);
                 
                 var jsonResponse = JsonNode.Parse(message)!;
-                var resPerson = jsonResponse["Person"]!;
-                var resEmail = resPerson["Email"]!;
+                var resTrackingId = jsonResponse["TrackingId"]!;
+                var resEmail = jsonResponse["Person"]!["Email"]!;
+
+                var trackingId = resTrackingId.GetValue<string>();
                 var email = resEmail.GetValue<string>();
 
-                if (!RequestList.TryGetValue(email, out Person? person) || person.Email != email)
+                if (!RequestList.TryGetValue(trackingId, out Person? person) || person.Email != email)
                 {
-                    Console.WriteLine("Response did not match with input");
+                    Console.WriteLine("Output did not match with input");
                     Interlocked.Increment(ref _totalFailed);
                 }
             }
@@ -276,8 +295,7 @@ namespace TestSampleAPIV2
             request.StartTime = DateTime.Now;
             await Execute(request);
 
-            Console.WriteLine("All requests have been sent successfully.");
-            Console.WriteLine("Waiting to get all responses.");
+            Console.WriteLine("Waiting to receive all notifications.");
             
             await Semaphore.WaitAsync(TimeSpan.FromMinutes(2)); // wait maximum 2 minutes to get all responses
             request.EndTime = DateTime.Now;
