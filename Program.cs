@@ -44,7 +44,7 @@ namespace TestSampleAPIV2
         public static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
         private static readonly Random Rnd = new();
 
-        private const int TotalNumberOfData = 5000;
+        private const int TotalNumberOfData = 10000;
         private const int TotalNumberOfRequest = 10000;
 
         private static Person[]? _persons;
@@ -90,7 +90,7 @@ namespace TestSampleAPIV2
                 {
                     FirstName = GetNextRandomString(35),
                     LastName = GetNextRandomString(35),
-                    Email = Guid.NewGuid().ToString() //GetNextRandomString(70)
+                    Email = ShuffleString(GetNextRandomString(70))
                 };
             }
         }
@@ -297,7 +297,7 @@ namespace TestSampleAPIV2
 
             Console.WriteLine("Waiting to receive all notifications.");
             
-            await Semaphore.WaitAsync(TimeSpan.FromMinutes(2)); // wait maximum 2 minutes to get all responses
+            await Semaphore.WaitAsync(TimeSpan.FromMinutes(1)); // wait maximum 1 minutes to get all responses
             request.EndTime = DateTime.Now;
             
             Print(request);
