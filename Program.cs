@@ -30,7 +30,9 @@ namespace TestSampleAPIV2
         {
             public required string TestName { get; init; }
             public required string Url { get; init; }
-
+            
+            public DbType DbType { get; set; }
+            
             public DateTime? StartTime { get; set; }
             public DateTime? EndTime { get; set; }
         }
@@ -45,7 +47,7 @@ namespace TestSampleAPIV2
         private static readonly Random Rnd = new();
 
         private const int TotalNumberOfData = 10000;
-        private const int TotalNumberOfRequest = 10000;
+        private const int TotalNumberOfRequest = 20000;
 
         private static Person[]? _persons;
 
@@ -205,12 +207,16 @@ namespace TestSampleAPIV2
         {
             var tasks = new Task[TotalNumberOfRequest];
 
+            DateTime start = DateTime.Now;
+            
             for (var i = 0; i < TotalNumberOfRequest; i++)
             {
                 tasks[i] = Task.Run(() => SendRequest(request));
             }
-            Console.WriteLine("All requests have been sent successfully.");
-            Console.WriteLine("Waiting to get all responses.");
+            DateTime end = DateTime.Now;
+            var timeDifference = end.Subtract(start);
+            var differenceInSeconds = (int)timeDifference.TotalMilliseconds;
+            Console.WriteLine($"{TotalNumberOfRequest} requests have been sent in {differenceInSeconds} milliseconds.");
             await Task.WhenAll(tasks);
         }
 
@@ -227,10 +233,10 @@ namespace TestSampleAPIV2
         {
             var request = dbType switch
             {
-                DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, },
-                DbType.MySql => new Request { TestName = "MySql Test:", Url = UrlMySql, },
-                DbType.InMemory => new Request { TestName = "In Memory Test:", Url = UrlInMemory },
-                DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis },
+                DbType.PgSql => new Request { TestName = "PgSql Test:", Url = UrlPgSql, DbType = dbType},
+                DbType.MySql => new Request { TestName = "MySql Test:", Url = UrlMySql, DbType = dbType},
+                DbType.InMemory => new Request { TestName = "In Memory Test:", Url = UrlInMemory, DbType = dbType },
+                DbType.Redis => new Request { TestName = "Redis Test:", Url = UrlRedis, DbType = dbType },
                 _ => throw new InvalidEnumArgumentException("Invalid data type")
             };
             return request;
@@ -297,9 +303,10 @@ namespace TestSampleAPIV2
 
             Console.WriteLine("Waiting to receive all notifications.");
             
-            await Semaphore.WaitAsync(TimeSpan.FromMinutes(1)); // wait maximum 1 minutes to get all responses
+            await Semaphore.WaitAsync(TimeSpan.FromMinutes(2)); // wait maximum 1 minutes to get all responses
             request.EndTime = DateTime.Now;
-            
+
+            Console.WriteLine();
             Print(request);
         }
     }
