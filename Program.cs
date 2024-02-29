@@ -48,6 +48,8 @@ namespace TestSampleAPIV2
 
         private const int TotalNumberOfData = 10000;
         private const int TotalNumberOfRequest = 20000;
+        private const int MaxWorkerThread = TotalNumberOfRequest + 1000;
+        private const int MinWorkerThread = 100;
 
         private static Person[]? _persons;
 
@@ -211,12 +213,17 @@ namespace TestSampleAPIV2
             
             for (var i = 0; i < TotalNumberOfRequest; i++)
             {
+                Console.Write(".");
                 tasks[i] = Task.Run(() => SendRequest(request));
             }
+            
             DateTime end = DateTime.Now;
             var timeDifference = end.Subtract(start);
             var differenceInSeconds = (int)timeDifference.TotalMilliseconds;
-            Console.WriteLine($"{TotalNumberOfRequest} requests have been sent in {differenceInSeconds} milliseconds.");
+
+            Console.WriteLine();
+            Console.WriteLine($"{TotalNumberOfRequest} requests have been sent in {differenceInSeconds} milliseconds, waiting for the completion of all requests:");
+
             await Task.WhenAll(tasks);
         }
 
@@ -270,7 +277,9 @@ namespace TestSampleAPIV2
 
         static async Task Main(string[] args)
         {
-            //_redis = ConnectionMultiplexer.Connect(RedisConnectionString);
+            ThreadPool.SetMinThreads(MinWorkerThread, MinWorkerThread);
+            ThreadPool.SetMaxThreads(MaxWorkerThread, MaxWorkerThread);
+            
             var sub = Redis.GetSubscriber();
             await sub.SubscribeAsync(AddPersonChannelSuccess, (channel, message) =>
             {
@@ -286,7 +295,7 @@ namespace TestSampleAPIV2
 
             GenerateData();
 
-            const DbType dbType = DbType.InMemory;
+            const DbType dbType = DbType.MySql;
 
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
