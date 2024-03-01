@@ -295,7 +295,7 @@ namespace TestSampleAPIV2
 
             GenerateData();
 
-            const DbType dbType = DbType.MySql;
+            const DbType dbType = DbType.PgSql;
 
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
@@ -310,7 +310,7 @@ namespace TestSampleAPIV2
             request.StartTime = DateTime.Now;
             await Execute(request);
 
-            Console.WriteLine("Waiting to receive all notifications.");
+            Console.WriteLine("Waiting to receive all notifications:");
             
             await Semaphore.WaitAsync(TimeSpan.FromMinutes(2)); // wait maximum 1 minutes to get all responses
             request.EndTime = DateTime.Now;
