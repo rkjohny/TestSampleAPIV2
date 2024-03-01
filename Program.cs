@@ -47,8 +47,8 @@ namespace TestSampleAPIV2
         private static readonly Random Rnd = new();
 
         private const int TotalNumberOfData = 10000;
-        private const int TotalNumberOfRequest = 20000;
-        private const int MaxWorkerThread = TotalNumberOfRequest + 1000;
+        private const int TotalNumberOfRequest = 10000;
+        private const int MaxWorkerThread = 30000;
         private const int MinWorkerThread = 100;
 
         private static Person[]? _persons;
@@ -227,7 +227,7 @@ namespace TestSampleAPIV2
             await Task.WhenAll(tasks);
         }
 
-        private static async Task Execute(Request request)
+        private static async Task ExecuteAsync(Request request)
         {
             _totalFailed = 0;
             _totalResponse = 0;
@@ -295,7 +295,7 @@ namespace TestSampleAPIV2
 
             GenerateData();
 
-            const DbType dbType = DbType.Redis;
+            const DbType dbType = DbType.PgSql;
 
             Console.WriteLine("*************************************************");
             Console.WriteLine("");
@@ -308,7 +308,7 @@ namespace TestSampleAPIV2
 
             Request request = GetRequest(dbType);
             request.StartTime = DateTime.Now;
-            await Execute(request);
+            await ExecuteAsync(request);
 
             Console.WriteLine("Waiting to receive all notifications:");
             
